@@ -1,6 +1,6 @@
 # Changelog
 
-Total so far: ~25 min.
+Total so far: ~35 min.
 
 ## Session 1: 2026-10-14 (~25 min)
 
@@ -17,3 +17,9 @@ Total so far: ~25 min.
 - Group invite codes and `join_group()`.
 - Supabase SQL in `supabase/`: `schema.sql`, `messages.sql`, `invite.sql`.
 - README and this changelog.
+
+## Session 2: 2026-10-14 (~10 min)
+
+### Added
+- GitHub Pages deploy: Vite `base` set to `/casper-golfsmack/` and a GitHub Actions workflow that builds and publishes on every push to `main`. Supabase URL and publishable key are passed in as repository secrets.
+- Live at https://shawnmcginn.github.io/casper-golfsmack/.
