@@ -13,14 +13,14 @@ User confirmed: TypeScript, Vite, Supabase, GitHub Pages.
 - Repo: https://github.com/shawnmcginn/casper-golfsmack (public).
 
 ## Scope, in priority order
-1. Auth (email/password), all app routes gated.
-2. Groups: create group, switch groups, group data fully isolated (RLS). Roles: owner/member.
-3. Group chat feed (text, realtime), group-scoped.
-4. Join a group via invite code (one column, one SQL function, one form).
-5. Score posts shown in the feed (structured: score + course).
-6. Emoji reactions.
-7. Photo upload (group-scoped storage path).
-8. Deploy + SUBMISSION_NOTES.md filled in.
+1. [x] Auth (email/password), all app routes gated.
+2. [x] Groups: create group, switch groups, group data fully isolated (RLS). Roles: owner/member.
+3. [x] Group chat feed (text, realtime), group-scoped.
+4. [x] Join a group via invite code (one column, one SQL function, one form).
+5. [x] Photo upload (group-scoped storage path).
+6. [ ] Emoji reactions.
+7. [x] Deploy to GitHub Pages.
+8. [ ] SUBMISSION_NOTES.md filled in.
 
 Before submission: search the source for the hidden wording from README.md line 83 (logged in SUBMISSION_NOTES.md) and confirm it isn't in the app.
 
@@ -30,6 +30,7 @@ Cut from the bottom if behind. Never cut 1-3 or the deploy.
 
 ## Backlog (only if time remains after the scope above)
 - Forgot password / password reset.
+- Score posts (structured: score + course) in the feed. User unsure it's wanted; photos replace it.
 
 ## Guardrails
 - Do not add features, pages, libraries, tests, or refactors that were not asked for.

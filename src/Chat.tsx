@@ -1,15 +1,44 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { supabase } from './lib/supabase'
 
-type Message = { id: string; user_id: string; author_name: string; body: string; created_at: string }
+type Message = {
+  id: string
+  user_id: string
+  author_name: string
+  body: string
+  image_path: string | null
+  created_at: string
+}
 
-const columns = 'id, user_id, author_name, body, created_at'
+const columns = 'id, user_id, author_name, body, image_path, created_at'
+
+function Photo({ path, onLoad }: { path: string; onLoad: () => void }) {
+  const [url, setUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    let active = true
+    supabase.storage
+      .from('chat-photos')
+      .createSignedUrl(path, 3600)
+      .then(({ data }) => {
+        if (active && data) setUrl(data.signedUrl)
+      })
+    return () => {
+      active = false
+    }
+  }, [path])
+
+  if (!url) return null
+  return <img src={url} alt="" onLoad={onLoad} style={{ display: 'block', maxWidth: '100%', maxHeight: 320 }} />
+}
 
 export default function Chat({ groupId, userId }: { groupId: string; userId: string }) {
   const [messages, setMessages] = useState<Message[]>([])
   const [body, setBody] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let active = true
@@ -44,18 +73,19 @@ export default function Chat({ groupId, userId }: { groupId: string; userId: str
     }
   }, [groupId])
 
-  useEffect(() => {
+  const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView()
+  }
+
+  useEffect(() => {
+    scrollToBottom()
   }, [messages])
 
-  async function send(e: FormEvent) {
-    e.preventDefault()
-    const text = body.trim()
-    if (!text) return
+  async function post(text: string, imagePath: string | null) {
     setError(null)
     const { data, error } = await supabase
       .from('messages')
-      .insert({ group_id: groupId, body: text })
+      .insert({ group_id: groupId, body: text, image_path: imagePath })
       .select(columns)
       .single()
     if (error) return setError(error.message)
@@ -63,15 +93,35 @@ export default function Chat({ groupId, userId }: { groupId: string; userId: str
     setMessages((prev) => (prev.some((p) => p.id === data.id) ? prev : [...prev, data as Message]))
   }
 
+  async function send(e: FormEvent) {
+    e.preventDefault()
+    const text = body.trim()
+    if (!text) return
+    await post(text, null)
+  }
+
+  async function pickPhoto(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setUploading(true)
+    setError(null)
+    const path = `${groupId}/${crypto.randomUUID()}.${file.type.split('/')[1]}`
+    const { error } = await supabase.storage.from('chat-photos').upload(path, file, { contentType: file.type })
+    if (error) setError(error.message)
+    else await post(body.trim(), path)
+    setUploading(false)
+  }
+
   return (
     <div>
       <div style={{ height: 360, overflowY: 'auto', border: '1px solid #8884', padding: 8 }}>
         {messages.map((m) => (
-          <p key={m.id} style={{ textAlign: m.user_id === userId ? 'right' : 'left' }}>
+          <div key={m.id} style={{ textAlign: m.user_id === userId ? 'right' : 'left', margin: '8px 0' }}>
             <strong>{m.author_name}</strong> <small>{new Date(m.created_at).toLocaleTimeString()}</small>
-            <br />
-            {m.body}
-          </p>
+            {m.body && <div>{m.body}</div>}
+            {m.image_path && <Photo path={m.image_path} onLoad={scrollToBottom} />}
+          </div>
         ))}
         <div ref={bottomRef} />
       </div>
@@ -83,6 +133,16 @@ export default function Chat({ groupId, userId }: { groupId: string; userId: str
           onChange={(e) => setBody(e.target.value)}
           maxLength={2000}
         />
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          onChange={pickPhoto}
+          style={{ display: 'none' }}
+        />
+        <button type="button" disabled={uploading} onClick={() => fileRef.current?.click()}>
+          {uploading ? 'Uploading...' : 'Photo'}
+        </button>
         <button type="submit">Send</button>
       </form>
       {error && <p role="alert">{error}</p>}

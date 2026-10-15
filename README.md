@@ -9,17 +9,19 @@ Built for the Casper engineering take-home (see [README-CASPER.md](README-CASPER
 - Email/password sign up and log in (with email confirmation). The app is gated behind auth.
 - Create groups and switch between them. Group data is isolated with Postgres Row Level Security.
 - Realtime text chat, scoped to the current group.
+- Photo uploads in chat, stored in a private bucket and visible only to group members.
 - Join a group with an invite code (shown on the group page).
 - Deployed to GitHub Pages: https://shawnmcginn.github.io/casper-golfsmack/
 
 ## Not built yet
 
-- Score posts, emoji reactions, photo uploads
+- Emoji reactions
+- Score posts (backlog)
 - Forgot password (backlog)
 
 ## Stack
 
-TypeScript, Vite, React, React Router (hash routing), Supabase (Auth, Postgres + RLS, Realtime), GitHub Pages (deployed by GitHub Actions on every push to `main`).
+TypeScript, Vite, React, React Router (hash routing), Supabase (Auth, Postgres + RLS, Realtime, Storage), GitHub Pages (deployed by GitHub Actions on every push to `main`).
 
 ## Run locally
 
@@ -32,6 +34,7 @@ TypeScript, Vite, React, React Router (hash routing), Supabase (Auth, Postgres +
    1. `supabase/schema.sql`
    2. `supabase/messages.sql`
    3. `supabase/invite.sql`
+   4. `supabase/photos.sql`
 4. Create `.env.local` in the project root:
    ```
    VITE_SUPABASE_URL=<your project URL>

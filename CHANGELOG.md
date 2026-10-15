@@ -23,3 +23,8 @@ Total so far: ~35 min.
 ### Added
 - GitHub Pages deploy: Vite `base` set to `/casper-golfsmack/` and a GitHub Actions workflow that builds and publishes on every push to `main`. Supabase URL and publishable key are passed in as repository secrets.
 - Live at https://shawnmcginn.github.io/casper-golfsmack/.
+
+## Session 3: 2026-10-14 (time not logged yet)
+
+### Added
+- Photo uploads in chat: private `chat-photos` Storage bucket, group-scoped paths and policies, and signed URLs for display (`supabase/photos.sql`).
