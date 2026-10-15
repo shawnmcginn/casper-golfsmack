@@ -8,9 +8,12 @@ type Message = {
   body: string
   image_path: string | null
   created_at: string
+  edited_at: string | null
+  deleted_at: string | null
 }
 
-const columns = 'id, user_id, author_name, body, image_path, created_at'
+const columns = 'id, user_id, author_name, body, image_path, created_at, edited_at, deleted_at'
+const COMPOSER_EMOJIS = ['😂', '🤣', '😎', '🔥', '💀', '👏', '🙌', '👀', '😭', '😤', '🍺', '🏆', '⛳', '🎯', '🐍', '🦆']
 
 function Photo({ path, onLoad }: { path: string; onLoad: () => void }) {
   const [url, setUrl] = useState<string | null>(null)
@@ -46,19 +49,25 @@ export default function Chat({
   const [body, setBody] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editText, setEditText] = useState('')
   const logRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [emojiOpen, setEmojiOpen] = useState(false)
 
   useEffect(() => {
     let active = true
     // realtime and the send handler can both deliver the same row
     const add = (m: Message) =>
       setMessages((prev) => (prev.some((p) => p.id === m.id) ? prev : [...prev, m]))
+    const replace = (m: Message) => setMessages((prev) => prev.map((p) => (p.id === m.id ? m : p)))
 
     supabase
       .from('messages')
       .select(columns)
       .eq('group_id', groupId)
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(100)
       .then(({ data, error }) => {
@@ -73,6 +82,11 @@ export default function Chat({
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `group_id=eq.${groupId}` },
         (payload) => add(payload.new as Message),
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages', filter: `group_id=eq.${groupId}` },
+        (payload) => replace(payload.new as Message),
       )
       .subscribe()
 
@@ -134,38 +148,129 @@ export default function Chat({
     setUploading(false)
   }
 
+  async function saveEdit(e: FormEvent) {
+    e.preventDefault()
+    if (!editingId) return
+    setError(null)
+    const { error } = await supabase.rpc('edit_message', { mid: editingId, new_body: editText })
+    if (error) return setError(error.message)
+    const edited = { body: editText.trim(), edited_at: new Date().toISOString() }
+    setMessages((prev) => prev.map((p) => (p.id === editingId ? { ...p, ...edited } : p)))
+    setEditingId(null)
+  }
+
+  async function remove(id: string) {
+    if (!window.confirm('Delete this message?')) return
+    setError(null)
+    const { error } = await supabase.rpc('delete_message', { mid: id })
+    if (error) return setError(error.message)
+    setMessages((prev) => prev.map((p) => (p.id === id ? { ...p, deleted_at: new Date().toISOString() } : p)))
+  }
+
+  function insertEmoji(emoji: string) {
+    const el = inputRef.current
+    const start = el?.selectionStart ?? body.length
+    const end = el?.selectionEnd ?? body.length
+    const next = body.slice(0, start) + emoji + body.slice(end)
+    if (next.length > 2000) return
+    setBody(next)
+    setEmojiOpen(false)
+    requestAnimationFrame(() => {
+      el?.focus()
+      el?.setSelectionRange(start + emoji.length, start + emoji.length)
+    })
+  }
+
   return (
     <div>
       <div className="chat-log" ref={logRef}>
         {[...messages]
+          .filter((m) => !m.deleted_at)
           .sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at))
           .map((m) => (
-          <div key={m.id} className={m.user_id === userId ? 'msg mine' : 'msg'}>
-            <div className="msg-meta">
-              <strong>{names[m.user_id] ?? m.author_name}</strong>{' '}
-              {new Date(m.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+            <div key={m.id} className={m.user_id === userId ? 'msg mine' : 'msg'}>
+              <div className="msg-meta">
+                <strong>{names[m.user_id] ?? m.author_name}</strong>{' '}
+                {new Date(m.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                {m.edited_at && ' (edited)'}
+                {m.user_id === userId && editingId !== m.id && (
+                  <>
+                    {' '}
+                    <button
+                      type="button"
+                      className="link-btn"
+                      onClick={() => {
+                        setEditingId(m.id)
+                        setEditText(m.body)
+                      }}
+                    >
+                      Edit
+                    </button>{' '}
+                    <button type="button" className="link-btn" onClick={() => remove(m.id)}>
+                      Delete
+                    </button>
+                  </>
+                )}
+              </div>
+              {editingId === m.id ? (
+                <form onSubmit={saveEdit} className="composer">
+                  <input
+                    type="text"
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    maxLength={2000}
+                    autoFocus
+                  />
+                  <button type="submit" className="btn btn-primary">
+                    Save
+                  </button>
+                  <button type="button" className="btn" onClick={() => setEditingId(null)}>
+                    Cancel
+                  </button>
+                </form>
+              ) : (
+                m.body && <div>{m.body}</div>
+              )}
+              {m.image_path && <Photo path={m.image_path} onLoad={scrollToBottom} />}
             </div>
-            {m.body && <div>{m.body}</div>}
-            {m.image_path && <Photo path={m.image_path} onLoad={scrollToBottom} />}
-          </div>
-        ))}
+          ))}
       </div>
-      <form onSubmit={send} className="composer">
-        <input
-          type="text"
-          placeholder="Message"
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          maxLength={2000}
-        />
-        <input ref={fileRef} type="file" accept="image/*" onChange={pickPhoto} hidden />
-        <button type="button" className="btn" disabled={uploading} onClick={() => fileRef.current?.click()}>
-          {uploading ? 'Uploading...' : 'Photo'}
-        </button>
-        <button type="submit" className="btn btn-primary">
-          Send
-        </button>
-      </form>
+      <div className="composer-wrap">
+        {emojiOpen && (
+          <div className="emoji-panel">
+            {COMPOSER_EMOJIS.map((emoji) => (
+              <button key={emoji} type="button" className="emoji-btn" onClick={() => insertEmoji(emoji)}>
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
+        <form onSubmit={send} className="composer">
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Message"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            maxLength={2000}
+          />
+          <button
+            type="button"
+            className="btn"
+            aria-label="Add emoji"
+            onClick={() => setEmojiOpen((open) => !open)}
+          >
+            😊
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" onChange={pickPhoto} hidden />
+          <button type="button" className="btn" disabled={uploading} onClick={() => fileRef.current?.click()}>
+            {uploading ? 'Uploading...' : 'Photo'}
+          </button>
+          <button type="submit" className="btn btn-primary">
+            Send
+          </button>
+        </form>
+      </div>
       {error && <p className="error" role="alert">{error}</p>}
     </div>
   )

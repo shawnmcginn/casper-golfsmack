@@ -61,7 +61,7 @@ export default function Groups({
   const current = groups.find((g) => g.id === groupId)
 
   return (
-    <>
+    <div className="app-bg">
       <header className="topbar">
         <div className="brand">
           <FlagIcon />
@@ -120,8 +120,9 @@ export default function Groups({
         group={current}
         onEntered={entered}
         onNicknameSaved={() => setBoardKey((k) => k + 1)}
+        onRenamed={load}
         onLogout={onLogout}
       />
-    </>
+    </div>
   )
 }

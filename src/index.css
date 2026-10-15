@@ -22,6 +22,9 @@
 
 body {
   margin: 0;
+}
+
+.app-bg {
   min-height: 100vh;
   background:
     linear-gradient(rgba(20, 40, 25, 0.3), rgba(20, 40, 25, 0.3)),
@@ -381,4 +384,75 @@ dialog h4 {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+}
+
+/* message actions */
+.link-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--green-700);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* rounds carousel */
+.carousel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.carousel-slide {
+  flex: 1;
+  min-width: 0;
+}
+
+.carousel-btn {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.center {
+  text-align: center;
+}
+
+/* composer emoji picker */
+.composer-wrap {
+  position: relative;
+}
+
+.emoji-panel {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  margin-bottom: 6px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.emoji-btn {
+  padding: 4px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.emoji-btn:hover {
+  background: var(--green-100);
 }

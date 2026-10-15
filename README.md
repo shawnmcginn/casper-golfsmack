@@ -1,27 +1,31 @@
 # Golfsmack
 
-A group chat for golf buddies, replacing the SMS thread. Each group has its own private feed, and nothing is shared between groups.
+A group chat for golf buddies, replacing the SMS thread. Each group has its own private feed, leaderboard and rounds, and nothing is shared between groups.
 
-Built for the Casper engineering take-home (see [README-CASPER.md](README-CASPER.md)). Status and submission details are in [SUBMISSION_NOTES.md](SUBMISSION_NOTES.md).
+Built for the Casper engineering take-home (see [README-CASPER.md](README-CASPER.md)). Status and submission details are in [SUBMISSION_NOTES.md](SUBMISSION_NOTES.md). The change history with time spent is in [CHANGELOG.md](CHANGELOG.md).
+
+Live: https://shawnmcginn.github.io/casper-golfsmack/
 
 ## What works
 
-- Email/password sign up and log in (with email confirmation). The app is gated behind auth.
-- Create groups and switch between them. Group data is isolated with Postgres Row Level Security.
-- Realtime text chat, scoped to the current group.
-- Photo uploads in chat, stored in a private bucket and visible only to group members.
-- Add a round (date + each player's score) in a modal. A per-group leaderboard beside the chat shows each player's average score and rounds played, updating live.
+- Email/password sign up and log in (with email confirmation). The whole app is gated behind auth.
+- Multiple groups: create groups, switch between them, and join one with an invite code. Group data is isolated with Postgres Row Level Security, so one group never sees another's chat, photos or rounds.
+- Realtime group chat, with an emoji picker beside the message box, photo uploads (private storage, visible only to group members), and edit and delete for your own messages.
+- Rounds and leaderboard: add a round (date plus each player's score) in a modal. A leaderboard beside the chat shows each player's average score and rounds played, updating live. View rounds opens a carousel of past rounds with their dates and scores.
 - Per-group nicknames, shown on the leaderboard and in chat.
-- Golf-themed UI with a photo background. An avatar menu opens a Settings modal (nickname, create/join group, log out).
+- The group owner can rename the group.
 - "Invite a friend" opens an email draft with the group's invite code and sign-up steps.
-- Join a group with an invite code (shown on the group page).
-- Deployed to GitHub Pages: https://shawnmcginn.github.io/casper-golfsmack/
+- Golf-themed UI with a photo background. The avatar menu opens a Settings modal (nickname, group name, create or join a group, log out).
 
 ## Not built yet
 
-- Emoji reactions
-- Score posts (backlog)
-- Forgot password (backlog)
+- Email confirmation relies on Supabase's built-in sender, which is rate limited (the limit was hit during testing)
+- Group admin roles beyond the creator (owner), removing members, regenerating the invite code
+- Forgot password
+- Edit and delete rounds
+- Chat pagination (the last 100 messages load)
+
+The ranked list of what's next is in the Backlog section of [.github/copilot-instructions.md](.github/copilot-instructions.md).
 
 ## Stack
 
@@ -41,6 +45,7 @@ TypeScript, Vite, React, React Router (hash routing), Supabase (Auth, Postgres +
    4. `supabase/photos.sql`
    5. `supabase/rounds.sql`
    6. `supabase/nicknames.sql`
+   7. `supabase/features.sql`
 4. Create `.env.local` in the project root:
    ```
    VITE_SUPABASE_URL=<your project URL>

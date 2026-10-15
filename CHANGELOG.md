@@ -1,6 +1,6 @@
 # Changelog
 
-Total so far: ~93 min.
+Total so far: ~128 min.
 
 ## Session 1: 2026-10-14 (~25 min)
 
@@ -41,8 +41,25 @@ Total so far: ~93 min.
 - Golf-themed UI: one shared stylesheet, flag logo and favicon, and restyled sign-in, chat and leaderboard.
 - Avatar button that opens a Settings modal (your nickname, create or join a group, log out). The group dropdown is now labelled.
 - "Invite a friend" link in the top bar that opens an email draft with the group's invite code and sign-up steps.
-- Page background photo (Pixabay, credited in `SUBMISSION_NOTES.md`).
+- Page background photo (Pixabay, credited in `SUBMISSION_NOTES.md`). Licence confirmed on its Pixabay page: free for use under the Pixabay Content License.
 
 ### Changed
 - Chat shows each person's current nickname, including on older messages.
 - Chat is anchored to the bottom, sorted by send time, and scrolls only the chat window.
+
+## Session 6: 2026-10-15 (~35 min)
+
+### Added
+- Edit and delete your own messages (soft delete, so it reaches other people's open chats live).
+- View rounds: a modal that pages through past rounds, newest first, with each round's date and scores.
+- Group rename, owner only.
+- Emoji picker beside the message box that inserts an emoji into the message.
+- Supabase SQL: `supabase/features.sql` (edit and delete message, group rename).
+- Filled in `SUBMISSION_NOTES.md` and updated the README.
+
+### Changed
+- The login screen no longer shows the background photo; it only appears once you are signed in.
+- Smaller round arrow buttons in the rounds carousel.
+
+### Dropped
+- Emoji reactions under each message. Built, then removed in favour of the emoji picker.

@@ -2,7 +2,18 @@ import { useCallback, useEffect, useRef, useState, type FormEvent, type RefObjec
 import { supabase } from './lib/supabase'
 
 type Member = { user_id: string; display_name: string }
-type Score = { user_id: string; score: number }
+type Score = { round_id: string; user_id: string; score: number }
+type Round = { id: string; played_on: string }
+
+function formatDate(playedOn: string) {
+  const [y, m, d] = playedOn.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString([], {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
 
 function AddRound({
   groupId,
@@ -72,20 +83,111 @@ function AddRound({
   )
 }
 
+function RoundsViewer({
+  dialogRef,
+  rounds,
+  scores,
+  members,
+  index,
+  onIndex,
+}: {
+  dialogRef: RefObject<HTMLDialogElement | null>
+  rounds: Round[]
+  scores: Score[]
+  members: Member[]
+  index: number
+  onIndex: (i: number) => void
+}) {
+  const safeIndex = Math.min(index, Math.max(rounds.length - 1, 0))
+  const round = rounds[safeIndex]
+  const rows = round ? scores.filter((s) => s.round_id === round.id).sort((a, b) => a.score - b.score) : []
+  const nameOf = (id: string) => members.find((m) => m.user_id === id)?.display_name ?? 'Former member'
+
+  return (
+    <dialog ref={dialogRef}>
+      <div className="modal-head">
+        <h3>Rounds</h3>
+        <button type="button" className="btn btn-ghost" onClick={() => dialogRef.current?.close()}>
+          Close
+        </button>
+      </div>
+      {!round ? (
+        <p className="muted">No rounds yet.</p>
+      ) : (
+        <>
+          <div className="carousel">
+            <button
+              type="button"
+              className="btn carousel-btn"
+              aria-label="Newer round"
+              disabled={safeIndex === 0}
+              onClick={() => onIndex(safeIndex - 1)}
+            >
+              ‹
+            </button>
+            <div className="carousel-slide">
+              <h4>{formatDate(round.played_on)}</h4>
+              <table className="board">
+                <thead>
+                  <tr>
+                    <th align="left">Player</th>
+                    <th align="right">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.user_id}>
+                      <td>{nameOf(r.user_id)}</td>
+                      <td align="right">{r.score}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button
+              type="button"
+              className="btn carousel-btn"
+              aria-label="Older round"
+              disabled={safeIndex === rounds.length - 1}
+              onClick={() => onIndex(safeIndex + 1)}
+            >
+              ›
+            </button>
+          </div>
+          <p className="muted center">
+            {safeIndex + 1} of {rounds.length}
+          </p>
+        </>
+      )}
+    </dialog>
+  )
+}
+
 export default function Leaderboard({ groupId }: { groupId: string }) {
   const [members, setMembers] = useState<Member[]>([])
   const [scores, setScores] = useState<Score[]>([])
+  const [rounds, setRounds] = useState<Round[]>([])
+  const [roundIndex, setRoundIndex] = useState(0)
   const [error, setError] = useState<string | null>(null)
-  const dialogRef = useRef<HTMLDialogElement>(null)
+  const addRef = useRef<HTMLDialogElement>(null)
+  const viewRef = useRef<HTMLDialogElement>(null)
 
   const load = useCallback(async () => {
-    const [m, s] = await Promise.all([
+    const [m, s, r] = await Promise.all([
       supabase.from('memberships').select('user_id, display_name').eq('group_id', groupId),
-      supabase.from('round_scores').select('user_id, score').eq('group_id', groupId),
+      supabase.from('round_scores').select('round_id, user_id, score').eq('group_id', groupId),
+      supabase
+        .from('rounds')
+        .select('id, played_on')
+        .eq('group_id', groupId)
+        .order('played_on', { ascending: false })
+        .order('created_at', { ascending: false }),
     ])
-    if (m.error || s.error) return setError((m.error ?? s.error)!.message)
-    setMembers(m.data)
-    setScores(s.data)
+    const failed = m.error ?? s.error ?? r.error
+    if (failed) return setError(failed.message)
+    setMembers(m.data ?? [])
+    setScores(s.data ?? [])
+    setRounds(r.data ?? [])
   }, [groupId])
 
   useEffect(() => {
@@ -118,9 +220,20 @@ export default function Leaderboard({ groupId }: { groupId: string }) {
     <div className="panel">
       <div className="panel-head">
         <h3>Leaderboard</h3>
-        <button className="btn btn-primary" onClick={() => dialogRef.current?.showModal()}>
-          Add round
-        </button>
+        <div className="row">
+          <button
+            className="btn"
+            onClick={() => {
+              setRoundIndex(0)
+              viewRef.current?.showModal()
+            }}
+          >
+            View rounds
+          </button>
+          <button className="btn btn-primary" onClick={() => addRef.current?.showModal()}>
+            Add round
+          </button>
+        </div>
       </div>
       <table className="board">
         <thead>
@@ -143,7 +256,15 @@ export default function Leaderboard({ groupId }: { groupId: string }) {
         </tbody>
       </table>
       {error && <p className="error" role="alert">{error}</p>}
-      <AddRound groupId={groupId} members={members} dialogRef={dialogRef} onSaved={load} />
+      <AddRound groupId={groupId} members={members} dialogRef={addRef} onSaved={load} />
+      <RoundsViewer
+        dialogRef={viewRef}
+        rounds={rounds}
+        scores={scores}
+        members={members}
+        index={roundIndex}
+        onIndex={setRoundIndex}
+      />
     </div>
   )
 }

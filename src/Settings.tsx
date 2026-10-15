@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type RefObject } from 'react'
+import { useEffect, useState, type FormEvent, type RefObject } from 'react'
 import { supabase } from './lib/supabase'
 import Nickname from './Nickname'
 
@@ -46,6 +46,46 @@ export function GroupForms({ onEntered }: { onEntered: (groupId: string) => void
   )
 }
 
+function GroupName({ group, userId, onRenamed }: { group: Group; userId: string; onRenamed: () => void }) {
+  const [isOwner, setIsOwner] = useState(false)
+  const [name, setName] = useState(group.name)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    supabase
+      .from('memberships')
+      .select('role')
+      .eq('group_id', group.id)
+      .eq('user_id', userId)
+      .single()
+      .then(({ data }) => setIsOwner(data?.role === 'owner'))
+  }, [group.id, userId])
+
+  async function save(e: FormEvent) {
+    e.preventDefault()
+    setError(null)
+    const { error } = await supabase.rpc('rename_group', { gid: group.id, new_name: name })
+    if (error) return setError(error.message)
+    onRenamed()
+  }
+
+  if (!isOwner) return null
+  return (
+    <form onSubmit={save} className="stack">
+      <label className="stack">
+        <span>Group name</span>
+        <span className="row">
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={60} required />
+          <button type="submit" className="btn btn-primary" disabled={!name.trim() || name.trim() === group.name}>
+            Rename
+          </button>
+        </span>
+      </label>
+      {error && <p className="error" role="alert">{error}</p>}
+    </form>
+  )
+}
+
 export default function Settings({
   dialogRef,
   email,
@@ -53,6 +93,7 @@ export default function Settings({
   group,
   onEntered,
   onNicknameSaved,
+  onRenamed,
   onLogout,
 }: {
   dialogRef: RefObject<HTMLDialogElement | null>
@@ -61,6 +102,7 @@ export default function Settings({
   group: Group | undefined
   onEntered: (groupId: string) => void | Promise<void>
   onNicknameSaved: () => void
+  onRenamed: () => void
   onLogout: () => void
 }) {
   return (
@@ -75,6 +117,7 @@ export default function Settings({
       {group && (
         <section>
           <h4>{group.name}</h4>
+          <GroupName key={`${group.id}-${group.name}`} group={group} userId={userId} onRenamed={onRenamed} />
           <Nickname key={group.id} groupId={group.id} userId={userId} onSaved={onNicknameSaved} />
         </section>
       )}
