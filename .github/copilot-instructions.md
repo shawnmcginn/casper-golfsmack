@@ -38,3 +38,4 @@ Cut from the bottom if behind. Never cut 1-3 or the deploy.
 - Do not add anything to the UI that the user didn't ask for.
 - Ask before changing scope or stack. Don't expand scope silently.
 - Only commit when the user tells you to.
+- Every CHANGELOG.md session entry must have its time allotted. Never commit or push with "time not logged yet". Get the minutes from the user first, and keep the total at the top in sync.
