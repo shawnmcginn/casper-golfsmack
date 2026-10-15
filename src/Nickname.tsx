@@ -39,15 +39,17 @@ export default function Nickname({
   }
 
   return (
-    <form onSubmit={save} style={{ display: 'flex', gap: 8, alignItems: 'center', margin: '8px 0' }}>
-      <label>
-        Your nickname in this group{' '}
-        <input value={name} onChange={(e) => setName(e.target.value)} maxLength={30} required />
+    <form onSubmit={save} className="stack">
+      <label className="stack">
+        <span>Your nickname in this group</span>
+        <span className="row">
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={30} required />
+          <button type="submit" className="btn btn-primary" disabled={!name.trim() || name.trim() === saved}>
+            Save
+          </button>
+        </span>
       </label>
-      <button type="submit" disabled={!name.trim() || name.trim() === saved}>
-        Save
-      </button>
-      {error && <span role="alert">{error}</span>}
+      {error && <p className="error" role="alert">{error}</p>}
     </form>
   )
 }

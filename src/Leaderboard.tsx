@@ -38,13 +38,13 @@ function AddRound({
 
   return (
     <dialog ref={dialogRef}>
-      <form onSubmit={save} style={{ display: 'grid', gap: 8, minWidth: 260 }}>
+      <form onSubmit={save} className="stack">
         <h3>Add a round</h3>
-        <label>
+        <label className="score-row">
           Date <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
         </label>
         {members.map((m) => (
-          <label key={m.user_id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+          <label key={m.user_id} className="score-row">
             {m.display_name}
             <input
               type="number"
@@ -52,19 +52,18 @@ function AddRound({
               min={18}
               max={200}
               placeholder="Score"
-              style={{ width: 80 }}
               value={values[m.user_id] ?? ''}
               onChange={(e) => setValues((prev) => ({ ...prev, [m.user_id]: e.target.value }))}
             />
           </label>
         ))}
-        <small>Leave blank for anyone who didn't play.</small>
-        {error && <p role="alert">{error}</p>}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button type="button" onClick={() => dialogRef.current?.close()}>
+        <small className="muted">Leave blank for anyone who didn't play.</small>
+        {error && <p className="error" role="alert">{error}</p>}
+        <div className="actions">
+          <button type="button" className="btn" onClick={() => dialogRef.current?.close()}>
             Cancel
           </button>
-          <button type="submit" disabled={saving}>
+          <button type="submit" className="btn btn-primary" disabled={saving}>
             Save round
           </button>
         </div>
@@ -116,12 +115,14 @@ export default function Leaderboard({ groupId }: { groupId: string }) {
     })
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="panel">
+      <div className="panel-head">
         <h3>Leaderboard</h3>
-        <button onClick={() => dialogRef.current?.showModal()}>Add round</button>
+        <button className="btn btn-primary" onClick={() => dialogRef.current?.showModal()}>
+          Add round
+        </button>
       </div>
-      <table style={{ width: '100%' }}>
+      <table className="board">
         <thead>
           <tr>
             <th align="left">#</th>
@@ -141,7 +142,7 @@ export default function Leaderboard({ groupId }: { groupId: string }) {
           ))}
         </tbody>
       </table>
-      {error && <p role="alert">{error}</p>}
+      {error && <p className="error" role="alert">{error}</p>}
       <AddRound groupId={groupId} members={members} dialogRef={dialogRef} onSaved={load} />
     </div>
   )

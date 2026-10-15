@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { supabase } from './lib/supabase'
+import FlagIcon from './FlagIcon'
 
 export default function Auth() {
   const [mode, setMode] = useState<'login' | 'signup'>('login')
@@ -26,15 +27,12 @@ export default function Auth() {
   }
 
   return (
-    <form onSubmit={submit} style={{ maxWidth: 320, margin: '4rem auto', display: 'grid', gap: 12 }}>
-      <h1>Golfsmack</h1>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
+    <form onSubmit={submit} className="auth">
+      <div className="brand">
+        <FlagIcon />
+        Golfsmack
+      </div>
+      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
       <input
         type="password"
         placeholder="Password"
@@ -43,12 +41,12 @@ export default function Auth() {
         minLength={6}
         required
       />
-      <button type="submit" disabled={busy}>
+      <button type="submit" className="btn btn-primary" disabled={busy}>
         {mode === 'login' ? 'Log in' : 'Sign up'}
       </button>
-      {error && <p role="alert">{error}</p>}
+      {error && <p className="error" role="alert">{error}</p>}
       {notice && <p>{notice}</p>}
-      <button type="button" onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}>
+      <button type="button" className="btn btn-ghost" onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}>
         {mode === 'login' ? 'Need an account? Sign up' : 'Have an account? Log in'}
       </button>
     </form>

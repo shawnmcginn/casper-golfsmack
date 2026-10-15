@@ -1,21 +1,27 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import Chat from './Chat'
+import FlagIcon from './FlagIcon'
 import Leaderboard from './Leaderboard'
-import Nickname from './Nickname'
+import Settings, { GroupForms, type Group } from './Settings'
 
-type Group = { id: string; name: string; invite_code: string }
-
-export default function Groups({ userId }: { userId: string }) {
+export default function Groups({
+  userId,
+  email,
+  onLogout,
+}: {
+  userId: string
+  email: string
+  onLogout: () => void
+}) {
   const { groupId } = useParams()
   const navigate = useNavigate()
   const [groups, setGroups] = useState<Group[]>([])
   const [loaded, setLoaded] = useState(false)
-  const [name, setName] = useState('')
-  const [code, setCode] = useState('')
   const [boardKey, setBoardKey] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const settingsRef = useRef<HTMLDialogElement>(null)
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('groups').select('id, name, invite_code').order('created_at')
@@ -32,83 +38,90 @@ export default function Groups({ userId }: { userId: string }) {
     if (loaded && !groupId && groups.length > 0) navigate(`/g/${groups[0].id}`, { replace: true })
   }, [loaded, groupId, groups, navigate])
 
-  async function create(e: FormEvent) {
-    e.preventDefault()
-    setError(null)
-    const { data, error } = await supabase.rpc('create_group', { group_name: name })
-    if (error) return setError(error.message)
-    setName('')
+  async function entered(id: string) {
     await load()
-    navigate(`/g/${data as string}`)
+    navigate(`/g/${id}`)
   }
 
-  async function join(e: FormEvent) {
-    e.preventDefault()
-    setError(null)
-    const { data, error } = await supabase.rpc('join_group', { code })
-    if (error) return setError(error.message)
-    setCode('')
-    await load()
-    navigate(`/g/${data as string}`)
+  function inviteLink(group: Group) {
+    const site = new URL(import.meta.env.BASE_URL, window.location.origin).href
+    const subject = `Join ${group.name} on Golfsmack`
+    const body = [
+      `You're invited to join "${group.name}" on Golfsmack, a group chat and leaderboard for our golf group.`,
+      '',
+      `1. Open ${site}`,
+      '2. Sign up or log in',
+      '3. Tap your avatar (top right), then Settings, then Join group',
+      `4. Enter this invite code: ${group.invite_code}`,
+    ].join('\n')
+    return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
   if (!loaded) return null
   const current = groups.find((g) => g.id === groupId)
 
   return (
-    <div>
-      {groups.length > 0 && (
-        <select value={groupId ?? ''} onChange={(e) => navigate(`/g/${e.target.value}`)}>
-          {groups.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name}
-            </option>
-          ))}
-        </select>
-      )}
-      <form onSubmit={create} style={{ display: 'inline-flex', gap: 8, marginLeft: 12 }}>
-        <input
-          placeholder="New group name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={60}
-          required
-        />
-        <button type="submit">Create group</button>
-      </form>
-      <form onSubmit={join} style={{ display: 'inline-flex', gap: 8, marginLeft: 12 }}>
-        <input
-          placeholder="Invite code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          required
-        />
-        <button type="submit">Join group</button>
-      </form>
-      {error && <p role="alert">{error}</p>}
-      {groups.length === 0 && <p>You're not in any groups yet. Create one to get started.</p>}
-      {current && (
-        <>
-          <h2>{current.name}</h2>
-          <p>
-            Invite code: <code>{current.invite_code}</code>
-          </p>
-          <Nickname
-            key={current.id}
-            groupId={current.id}
-            userId={userId}
-            onSaved={() => setBoardKey((k) => k + 1)}
-          />
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-            <div style={{ flex: '2 1 320px', minWidth: 0 }}>
-              <Chat key={current.id} groupId={current.id} userId={userId} />
+    <>
+      <header className="topbar">
+        <div className="brand">
+          <FlagIcon />
+          Golfsmack
+        </div>
+        {groups.length > 0 && (
+          <label className="topbar-field">
+            Group
+            <select
+              className="group-select"
+              value={groupId ?? ''}
+              onChange={(e) => navigate(`/g/${e.target.value}`)}
+            >
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {current && (
+          <a className="invite-btn" href={inviteLink(current)} target="_blank" rel="noopener noreferrer">
+            Invite a friend
+          </a>
+        )}
+        <button className="avatar" aria-label="Settings" onClick={() => settingsRef.current?.showModal()}>
+          {(email[0] ?? '?').toUpperCase()}
+        </button>
+      </header>
+
+      <main className="page">
+        {error && <p className="error" role="alert">{error}</p>}
+        {groups.length === 0 && (
+          <div className="panel empty">
+            <p>You're not in any groups yet. Create one to get started.</p>
+            <GroupForms onEntered={entered} />
+          </div>
+        )}
+        {current && (
+          <div className="layout">
+            <div className="main-col">
+              <Chat key={current.id} groupId={current.id} userId={userId} refreshKey={boardKey} />
             </div>
-            <aside style={{ flex: '1 1 240px' }}>
+            <aside className="side-col">
               <Leaderboard key={`${current.id}-${boardKey}`} groupId={current.id} />
             </aside>
           </div>
-        </>
-      )}
-    </div>
+        )}
+      </main>
+
+      <Settings
+        dialogRef={settingsRef}
+        email={email}
+        userId={userId}
+        group={current}
+        onEntered={entered}
+        onNicknameSaved={() => setBoardKey((k) => k + 1)}
+        onLogout={onLogout}
+      />
+    </>
   )
 }

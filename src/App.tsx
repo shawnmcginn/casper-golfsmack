@@ -21,17 +21,18 @@ export default function App() {
   if (loading) return null
   if (!session) return <Auth />
 
+  const groups = (
+    <Groups
+      userId={session.user.id}
+      email={session.user.email ?? ''}
+      onLogout={() => supabase.auth.signOut()}
+    />
+  )
+
   return (
-    <div style={{ maxWidth: 960, margin: '2rem auto' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <h1>Golfsmack</h1>
-        <button onClick={() => supabase.auth.signOut()}>Log out</button>
-      </header>
-      <p>Signed in as {session.user.email}</p>
-      <Routes>
-        <Route path="/" element={<Groups userId={session.user.id} />} />
-        <Route path="/g/:groupId" element={<Groups userId={session.user.id} />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/" element={groups} />
+      <Route path="/g/:groupId" element={groups} />
+    </Routes>
   )
 }

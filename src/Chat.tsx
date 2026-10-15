@@ -29,15 +29,24 @@ function Photo({ path, onLoad }: { path: string; onLoad: () => void }) {
   }, [path])
 
   if (!url) return null
-  return <img src={url} alt="" onLoad={onLoad} style={{ display: 'block', maxWidth: '100%', maxHeight: 320 }} />
+  return <img src={url} alt="" onLoad={onLoad} />
 }
 
-export default function Chat({ groupId, userId }: { groupId: string; userId: string }) {
+export default function Chat({
+  groupId,
+  userId,
+  refreshKey,
+}: {
+  groupId: string
+  userId: string
+  refreshKey: number
+}) {
   const [messages, setMessages] = useState<Message[]>([])
+  const [names, setNames] = useState<Record<string, string>>({})
   const [body, setBody] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
-  const bottomRef = useRef<HTMLDivElement>(null)
+  const logRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -73,8 +82,20 @@ export default function Chat({ groupId, userId }: { groupId: string; userId: str
     }
   }, [groupId])
 
+  useEffect(() => {
+    // current nicknames win over the name stamped on each message when it was sent
+    supabase
+      .from('memberships')
+      .select('user_id, display_name')
+      .eq('group_id', groupId)
+      .then(({ data }) => {
+        if (data) setNames(Object.fromEntries(data.map((m) => [m.user_id, m.display_name])))
+      })
+  }, [groupId, refreshKey])
+
   const scrollToBottom = () => {
-    bottomRef.current?.scrollIntoView()
+    const log = logRef.current
+    if (log) log.scrollTop = log.scrollHeight
   }
 
   useEffect(() => {
@@ -115,37 +136,37 @@ export default function Chat({ groupId, userId }: { groupId: string; userId: str
 
   return (
     <div>
-      <div style={{ height: 360, overflowY: 'auto', border: '1px solid #8884', padding: 8 }}>
-        {messages.map((m) => (
-          <div key={m.id} style={{ textAlign: m.user_id === userId ? 'right' : 'left', margin: '8px 0' }}>
-            <strong>{m.author_name}</strong> <small>{new Date(m.created_at).toLocaleTimeString()}</small>
+      <div className="chat-log" ref={logRef}>
+        {[...messages]
+          .sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at))
+          .map((m) => (
+          <div key={m.id} className={m.user_id === userId ? 'msg mine' : 'msg'}>
+            <div className="msg-meta">
+              <strong>{names[m.user_id] ?? m.author_name}</strong>{' '}
+              {new Date(m.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+            </div>
             {m.body && <div>{m.body}</div>}
             {m.image_path && <Photo path={m.image_path} onLoad={scrollToBottom} />}
           </div>
         ))}
-        <div ref={bottomRef} />
       </div>
-      <form onSubmit={send} style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+      <form onSubmit={send} className="composer">
         <input
-          style={{ flex: 1 }}
+          type="text"
           placeholder="Message"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           maxLength={2000}
         />
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          onChange={pickPhoto}
-          style={{ display: 'none' }}
-        />
-        <button type="button" disabled={uploading} onClick={() => fileRef.current?.click()}>
+        <input ref={fileRef} type="file" accept="image/*" onChange={pickPhoto} hidden />
+        <button type="button" className="btn" disabled={uploading} onClick={() => fileRef.current?.click()}>
           {uploading ? 'Uploading...' : 'Photo'}
         </button>
-        <button type="submit">Send</button>
+        <button type="submit" className="btn btn-primary">
+          Send
+        </button>
       </form>
-      {error && <p role="alert">{error}</p>}
+      {error && <p className="error" role="alert">{error}</p>}
     </div>
   )
 }

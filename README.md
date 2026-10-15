@@ -11,7 +11,9 @@ Built for the Casper engineering take-home (see [README-CASPER.md](README-CASPER
 - Realtime text chat, scoped to the current group.
 - Photo uploads in chat, stored in a private bucket and visible only to group members.
 - Add a round (date + each player's score) in a modal. A per-group leaderboard beside the chat shows each player's average score and rounds played, updating live.
-- Per-group nicknames.
+- Per-group nicknames, shown on the leaderboard and in chat.
+- Golf-themed UI with a photo background. An avatar menu opens a Settings modal (nickname, create/join group, log out).
+- "Invite a friend" opens an email draft with the group's invite code and sign-up steps.
 - Join a group with an invite code (shown on the group page).
 - Deployed to GitHub Pages: https://shawnmcginn.github.io/casper-golfsmack/
 

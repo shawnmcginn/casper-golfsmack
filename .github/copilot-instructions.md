@@ -29,10 +29,25 @@ Before deploy: set Vite `base` to `/casper-golfsmack/`. In Supabase (Authenticat
 
 Cut from the bottom if behind. Never cut 1-3 or the deploy.
 
-## Backlog (only if time remains after the scope above)
-- Forgot password / password reset.
-- Score posts (structured: score + course) in the feed. User unsure it's wanted; photos replace it.
-- Edit and delete rounds (currently a typo has to be fixed in the database).
+## Backlog (only if time remains after the scope above; ranked, highest first)
+1. Regenerate the group invite code (it is permanent today and is the only gate to a group).
+2. Rate-limit or lock out invite code guessing (8 hex characters, no attempt limit today).
+3. RBAC: group admins. Only owners/admins can manage the group; not every member.
+4. Remove a member (admin only) and leave a group.
+5. Forgot password / password reset.
+6. Security hardening: OWASP Top 10 review. Includes npm audit + Dependabot, a CSP meta tag (Pages can't set headers), confirming no secret/service_role key is in the repo or bundle, and reviewing rounds RLS / `add_round` for abuse. Also: long unbroken text (2,000 chars, no spaces) overflows the chat bubble; needs wrapping.
+7. Edit and delete rounds (currently a typo has to be fixed in the database).
+8. Edit and delete your own messages.
+9. Chat pagination (only the last 100 messages load).
+10. Mobile layout check, plus loading and empty states.
+11. Show round dates, e.g. a recent-rounds list (date is stored, not displayed).
+12. Unread / new-message indicator.
+13. Typing indicator: the three dots showing someone is actively typing in the chat window (Supabase Realtime presence/broadcast, no table needed).
+14. Rename or delete a group.
+15. Per-group background: pick from a set of optional backgrounds in the Settings modal, or upload their own image (group-scoped Storage path, size and type limits). Admin only, so build after RBAC (item 3).
+16. Avatar colours or photos (avatar is just an initial).
+17. "Add to home screen" PWA tags.
+18. Score posts (structured: score + course) in the feed. Decided not to do it; kept here only as a record.
 
 ## Guardrails
 - Do not add features, pages, libraries, tests, or refactors that were not asked for.
