@@ -3,7 +3,7 @@
 Source of truth: README.md (employer's assignment). Scope is limited to what it requires. If a task isn't needed for a README requirement, don't do it.
 
 ## Product
-A group chat for golf buddies, replacing an SMS thread: post scores, memes, emojis and pictures. Not a game. No points, brag scores, or gamification.
+A group chat for golf buddies, replacing an SMS thread: post scores, memes, emojis and pictures. Not a game. No points, brag scores, or gamification. The one stat is each player's average score per group, shown in a leaderboard beside the chat; rounds (date + each player's score) are added through a modal.
 
 ## Stack
 User confirmed: TypeScript, Vite, Supabase, GitHub Pages.
@@ -18,9 +18,10 @@ User confirmed: TypeScript, Vite, Supabase, GitHub Pages.
 3. [x] Group chat feed (text, realtime), group-scoped.
 4. [x] Join a group via invite code (one column, one SQL function, one form).
 5. [x] Photo upload (group-scoped storage path).
-6. [ ] Emoji reactions.
-7. [x] Deploy to GitHub Pages.
-8. [ ] SUBMISSION_NOTES.md filled in.
+6. [x] Rounds + leaderboard: add a round (date + each player's score) in a modal; per-group leaderboard of average scores on the right of the chat.
+7. [ ] Emoji reactions.
+8. [x] Deploy to GitHub Pages.
+9. [ ] SUBMISSION_NOTES.md filled in.
 
 Before submission: search the source for the hidden wording from README.md line 83 (logged in SUBMISSION_NOTES.md) and confirm it isn't in the app.
 
@@ -31,6 +32,7 @@ Cut from the bottom if behind. Never cut 1-3 or the deploy.
 ## Backlog (only if time remains after the scope above)
 - Forgot password / password reset.
 - Score posts (structured: score + course) in the feed. User unsure it's wanted; photos replace it.
+- Edit and delete rounds (currently a typo has to be fixed in the database).
 
 ## Guardrails
 - Do not add features, pages, libraries, tests, or refactors that were not asked for.

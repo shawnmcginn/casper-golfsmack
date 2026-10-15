@@ -1,6 +1,6 @@
 # Changelog
 
-Total so far: ~45 min.
+Total so far: ~56 min.
 
 ## Session 1: 2026-10-14 (~25 min)
 
@@ -28,3 +28,9 @@ Total so far: ~45 min.
 
 ### Added
 - Photo uploads in chat: private `chat-photos` Storage bucket, group-scoped paths and policies, and signed URLs for display (`supabase/photos.sql`).
+
+## Session 4: 2026-10-15 (~11 min)
+
+### Added
+- Rounds and leaderboard: an Add round modal (date + each player's score) and a per-group leaderboard of average scores beside the chat, updating live. Rounds and scores are saved together by `add_round()` (`supabase/rounds.sql`).
+- Per-group nicknames via `set_nickname()`, used on the leaderboard and on new chat messages (`supabase/nicknames.sql`).

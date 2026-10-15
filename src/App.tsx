@@ -22,7 +22,7 @@ export default function App() {
   if (!session) return <Auth />
 
   return (
-    <div style={{ maxWidth: 640, margin: '2rem auto' }}>
+    <div style={{ maxWidth: 960, margin: '2rem auto' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between' }}>
         <h1>Golfsmack</h1>
         <button onClick={() => supabase.auth.signOut()}>Log out</button>

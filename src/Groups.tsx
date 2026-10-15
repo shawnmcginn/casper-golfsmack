@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import Chat from './Chat'
+import Leaderboard from './Leaderboard'
+import Nickname from './Nickname'
 
 type Group = { id: string; name: string; invite_code: string }
 
@@ -12,6 +14,7 @@ export default function Groups({ userId }: { userId: string }) {
   const [loaded, setLoaded] = useState(false)
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
+  const [boardKey, setBoardKey] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
@@ -90,7 +93,20 @@ export default function Groups({ userId }: { userId: string }) {
           <p>
             Invite code: <code>{current.invite_code}</code>
           </p>
-          <Chat key={current.id} groupId={current.id} userId={userId} />
+          <Nickname
+            key={current.id}
+            groupId={current.id}
+            userId={userId}
+            onSaved={() => setBoardKey((k) => k + 1)}
+          />
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <div style={{ flex: '2 1 320px', minWidth: 0 }}>
+              <Chat key={current.id} groupId={current.id} userId={userId} />
+            </div>
+            <aside style={{ flex: '1 1 240px' }}>
+              <Leaderboard key={`${current.id}-${boardKey}`} groupId={current.id} />
+            </aside>
+          </div>
         </>
       )}
     </div>

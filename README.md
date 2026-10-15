@@ -10,6 +10,8 @@ Built for the Casper engineering take-home (see [README-CASPER.md](README-CASPER
 - Create groups and switch between them. Group data is isolated with Postgres Row Level Security.
 - Realtime text chat, scoped to the current group.
 - Photo uploads in chat, stored in a private bucket and visible only to group members.
+- Add a round (date + each player's score) in a modal. A per-group leaderboard beside the chat shows each player's average score and rounds played, updating live.
+- Per-group nicknames.
 - Join a group with an invite code (shown on the group page).
 - Deployed to GitHub Pages: https://shawnmcginn.github.io/casper-golfsmack/
 
@@ -35,6 +37,8 @@ TypeScript, Vite, React, React Router (hash routing), Supabase (Auth, Postgres +
    2. `supabase/messages.sql`
    3. `supabase/invite.sql`
    4. `supabase/photos.sql`
+   5. `supabase/rounds.sql`
+   6. `supabase/nicknames.sql`
 4. Create `.env.local` in the project root:
    ```
    VITE_SUPABASE_URL=<your project URL>
