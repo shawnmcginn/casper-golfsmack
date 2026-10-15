@@ -1,32 +1,45 @@
-# React + TypeScript + Vite
+# Golfsmack
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A group chat for golf buddies, replacing the SMS thread. Each group has its own private feed, and nothing is shared between groups.
 
-Currently, two official plugins are available:
+Built for the Casper engineering take-home (see [README-CASPER.md](README-CASPER.md)). Status and submission details are in [SUBMISSION_NOTES.md](SUBMISSION_NOTES.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## What works
 
-## React Compiler
+- Email/password sign up and log in (with email confirmation). The app is gated behind auth.
+- Create groups and switch between them. Group data is isolated with Postgres Row Level Security.
+- Realtime text chat, scoped to the current group.
+- Join a group with an invite code (shown on the group page).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Not built yet
 
-## Expanding the Oxlint configuration
+- Score posts, emoji reactions, photo uploads
+- Deployment to GitHub Pages
+- Forgot password (backlog)
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Stack
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+TypeScript, Vite, React, React Router (hash routing), Supabase (Auth, Postgres + RLS, Realtime). Planned deploy: GitHub Pages.
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Run locally
+
+1. Install dependencies:
+   ```sh
+   npm install
+   ```
+2. Create a Supabase project. Keep "Enable Data API" on and "Automatically expose new tables" off.
+3. In the Supabase SQL editor, run these files in order:
+   1. `supabase/schema.sql`
+   2. `supabase/messages.sql`
+   3. `supabase/invite.sql`
+4. Create `.env.local` in the project root:
+   ```
+   VITE_SUPABASE_URL=<your project URL>
+   VITE_SUPABASE_PUBLISHABLE_KEY=<your publishable key>
+   ```
+5. Start the dev server:
+   ```sh
+   npm run dev
+   ```
+
+To try groups, sign up two users, create a group as the first, and join with its invite code as the second.
