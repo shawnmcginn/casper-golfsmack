@@ -10,16 +10,16 @@ Built for the Casper engineering take-home (see [README-CASPER.md](README-CASPER
 - Create groups and switch between them. Group data is isolated with Postgres Row Level Security.
 - Realtime text chat, scoped to the current group.
 - Join a group with an invite code (shown on the group page).
+- Deployed to GitHub Pages: https://shawnmcginn.github.io/casper-golfsmack/
 
 ## Not built yet
 
 - Score posts, emoji reactions, photo uploads
-- Deployment to GitHub Pages
 - Forgot password (backlog)
 
 ## Stack
 
-TypeScript, Vite, React, React Router (hash routing), Supabase (Auth, Postgres + RLS, Realtime). Planned deploy: GitHub Pages.
+TypeScript, Vite, React, React Router (hash routing), Supabase (Auth, Postgres + RLS, Realtime), GitHub Pages (deployed by GitHub Actions on every push to `main`).
 
 ## Run locally
 
@@ -37,7 +37,7 @@ TypeScript, Vite, React, React Router (hash routing), Supabase (Auth, Postgres +
    VITE_SUPABASE_URL=<your project URL>
    VITE_SUPABASE_PUBLISHABLE_KEY=<your publishable key>
    ```
-5. Start the dev server:
+5. Start the dev server and open http://localhost:5173/casper-golfsmack/ (the Vite `base` path is set for Pages):
    ```sh
    npm run dev
    ```
