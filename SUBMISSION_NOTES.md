@@ -4,7 +4,7 @@ Hosted: https://shawnmcginn.github.io/casper-golfsmack/
 Repo: https://github.com/shawnmcginn/casper-golfsmack
 Time spent: see CHANGELOG.md.
 
-Golfsmack is a group chat for golf buddies that replaces the SMS thread we use today: chat, photos and emojis, plus a per-group leaderboard of average scores from rounds. It isn't a game, so there are no points or brag scores.
+Golfsmack is a group chat for golf buddies that replaces the SMS thread we use today: chat, photos and emojis, plus a per-group leaderboard of average scores from rounds.
 
 ## What currently works
 - Email/password sign up and log in. Every page is behind auth.
@@ -16,7 +16,7 @@ Golfsmack is a group chat for golf buddies that replaces the SMS thread we use t
 
 ## What is incomplete
 Known issue:
-- **Confirmation emails are rate limited.** Sign-up uses Supabase's built-in email sender, which allows only a few emails per hour. The limit was hit during testing, so new sign-ups may fail with "email rate limit exceeded" until it resets. Fix: custom SMTP, or turn off email confirmation.
+- **Email confirmation is turned off.** Supabase's built-in email sender is rate limited (a few emails per hour) and the limit was hit during testing, so confirmation was disabled. New accounts can log in immediately without confirming their email address. Re-enabling it needs custom SMTP.
 
 Not built yet (the full ranked backlog, in `.github/copilot-instructions.md`):
 - Regenerate the group invite code (it is permanent today and is the only gate to a group)
@@ -36,7 +36,9 @@ Not built yet (the full ranked backlog, in `.github/copilot-instructions.md`):
 - "Add to home screen" PWA tags
 
 ## How to run
-See the README: install with `npm install`, run the SQL files in `supabase/` in order in a Supabase project, add the URL and publishable key to `.env.local`, then `npm run dev`.
+Easiest: use the live version at https://shawnmcginn.github.io/casper-golfsmack/. Sign up with any email and password (no email confirmation is needed), create a group, and invite a second account with the group's invite code to see the shared chat and leaderboard.
+
+To run it locally instead, see the README: install with `npm install`, run the SQL files in `supabase/` in order in a Supabase project, add the URL and publishable key to `.env.local`, then `npm run dev`.
 
 ## AI usage disclosure
 AI-assisted development tools were used, as permitted by the assignment.

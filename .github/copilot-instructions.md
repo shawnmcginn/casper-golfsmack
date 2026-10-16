@@ -30,7 +30,7 @@ Before deploy: set Vite `base` to `/casper-golfsmack/`. In Supabase (Authenticat
 Cut from the bottom if behind. Never cut 1-3 or the deploy.
 
 ## Backlog (only if time remains after the scope above; ranked, highest first)
-1. Email confirmation: Supabase's built-in sender is rate limited (a few emails per hour, limit hit during testing). Use custom SMTP, or turn off "Confirm email".
+1. Email confirmation: turned off because Supabase's built-in sender is rate limited (a few emails per hour, limit hit during testing). Re-enable it with custom SMTP.
 2. Regenerate the group invite code (it is permanent today and is the only gate to a group).
 3. Rate-limit or lock out invite code guessing (8 hex characters, no attempt limit today).
 4. RBAC: group admins. Only owners/admins can manage the group; not every member.

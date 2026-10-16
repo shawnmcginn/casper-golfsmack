@@ -8,7 +8,7 @@ Live: https://shawnmcginn.github.io/casper-golfsmack/
 
 ## What works
 
-- Email/password sign up and log in (with email confirmation). The whole app is gated behind auth.
+- Email/password sign up and log in. The whole app is gated behind auth.
 - Multiple groups: create groups, switch between them, and join one with an invite code. Group data is isolated with Postgres Row Level Security, so one group never sees another's chat, photos or rounds.
 - Realtime group chat, with an emoji picker beside the message box, photo uploads (private storage, visible only to group members), and edit and delete for your own messages.
 - Rounds and leaderboard: add a round (date plus each player's score) in a modal. A leaderboard beside the chat shows each player's average score and rounds played, updating live. View rounds opens a carousel of past rounds with their dates and scores.
@@ -19,7 +19,7 @@ Live: https://shawnmcginn.github.io/casper-golfsmack/
 
 ## Not built yet
 
-- Email confirmation relies on Supabase's built-in sender, which is rate limited (the limit was hit during testing)
+- Email confirmation is turned off because Supabase's built-in email sender is rate limited; re-enabling it needs custom SMTP
 - Group admin roles beyond the creator (owner), removing members, regenerating the invite code
 - Forgot password
 - Edit and delete rounds
